@@ -42,7 +42,12 @@ def create_cut_mask(rng: chex.PRNGKey, size: tuple[int, int], mask_size: tuple[i
     mask = jax.lax.dynamic_slice(mask, mask_size_half, (height, width))
     return mask.reshape(height, width, 1)  # add channel dim.
 
-
+#
+# CowMask
+#
+# Reference: French et al., "Milking CowMask for Semi-Supervised Image Classification." NeurIPS 2020.
+# Code from: https://github.com/google-research/google-research/blob/master/milking_cowmask/masking/cow_mask.py
+#
 _ROOT_2 = math.sqrt(2.0)
 _ROOT_2_PI = math.sqrt(2.0 * math.pi)
 
