@@ -4,7 +4,7 @@
 
 </div>
 
-Viewax is an image augmentation library for JAX.
+Viewax is an image augmentation library for JAX. This project is now in progress and some functions are not tested enough.
 
 ## Installation
 ```bash
