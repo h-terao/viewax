@@ -85,7 +85,7 @@ def posterize(img: chex.Array, bits: int) -> chex.Array:
     Args:
         bits (int): Bits to shift. [0, 8]
     """
-    shift = 8 - bits.astype("int32")
+    shift = bits.astype("int32")
     degenerate = jnp.left_shift(jnp.right_shift(img, shift), shift)
     return degenerate.astype("uint8")
 
