@@ -29,15 +29,24 @@ def default_augment_space(n_bins: int):
     }
 
 
-def build_randaugment(
+def create_randaugment(
     n_layers: int,
     n_bins: int,
+    augment_space: dict[str, tuple[chex.Array], bool] | None = None,
     order: int = 0,
     mode: str = "constant",
     fill: int = 128,
-    augment_space=None,
 ) -> Callable[[chex.PRNGKey, chex.Array], chex.Array]:
-    """Create a function that transforms images by randaugment."""
+    """Create a function that transforms images by randaugment.
+
+    Args:
+        n_layers (int): Number of operations to apply.
+        n_bins (int): Number of bins.
+        augment_space (dict): Augmentation space.
+        order (int)
+        mode (str)
+        fill (int)
+    """
 
     if augment_space is None:
         augment_space = default_augment_space(n_bins)
@@ -153,12 +162,16 @@ def build_randaugment(
         )
         return carry, jnp.zeros(())
 
-    @jax.jit
+    # @jax.jit
     def fn(rng: chex.PRNGKey, img: chex.Array) -> chex.Array:
         rng_op, rng_mag = jax.random.split(rng, 2)
         op_idxs = jax.random.randint(rng_op, (n_layers,), 0, len(branches))
         mag_idxs = jax.random.randint(rng_mag, (n_layers,), 0, 2 * n_bins)
         img, _ = jax.lax.scan(body, img, xs=[op_idxs, mag_idxs])
+
+        print(op_idxs)
+        print(mag_idxs)
+        print()
         return img
 
     return fn

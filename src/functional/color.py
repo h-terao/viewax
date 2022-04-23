@@ -69,7 +69,7 @@ def contrast(img: chex.Array, factor: float) -> chex.Array:
 
     degenerate = jnp.full_like(degenerate, fill_value=mean, dtype="float32")
     degenerate = jnp.clip(degenerate, 0.0, 255.0)
-    degenerate = jnp.stack((degenerate,) * 3).astype(img.dtype)
+    degenerate = jnp.stack((degenerate,) * 3, axis=2).astype(img.dtype)
     degenerate = blend(degenerate, img, factor)
     return degenerate
 
