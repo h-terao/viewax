@@ -4,7 +4,7 @@
 
 </div>
 
-Augmentor is an image augmentation library for JAX inspired by [https://github.com/4rtemi5/imax](imax).
+Augmentor is an image augmentation library for JAX inspired by [imax](https://github.com/4rtemi5/imax).
 
 ## Requirements
 - Python >= 3.7
