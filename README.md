@@ -45,7 +45,7 @@ image = VF.rotate(image, 30)
 # CutOut.
 h, w, _ = image.shape
 mask = vblend.create_cut_mask(rng, (h, w), (h//2, w//2))
-image = vblend.blend_image(image, jnp.full_like(image, fill_value.image.mean()), mask)
+image = vblend.blend_image(image, jnp.full_like(image, fill_value=image.mean()), mask)
 
 # Normalize and feed it to DNNs.
 image = jnp.float32(image) / 255.0
