@@ -1,7 +1,7 @@
 """
 Reference:
     French et al., "Milking CowMask for Semi-Supervised Image Classification." NeurIPS 2020.
-Code from:
+Modify from:
     https://github.com/google-research/google-research/blob/master/milking_cowmask/masking/cow_mask.py
 """
 from __future__ import annotations
