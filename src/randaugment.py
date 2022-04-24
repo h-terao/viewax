@@ -1,3 +1,4 @@
+"""RandAugment implemented by viewax."""
 from __future__ import annotations
 from typing import Callable
 from functools import partial
@@ -6,7 +7,7 @@ import jax
 import jax.numpy as jnp
 import chex
 
-from . import functional as F
+from . import _src as F
 
 
 def default_augment_space(n_bins: int):
@@ -35,17 +36,28 @@ def create_randaugment(
     augment_space: dict[str, tuple[chex.Array], bool] | None = None,
     order: int = 0,
     mode: str = "constant",
-    fill: int = 128,
+    cval: int = 128,
 ) -> Callable[[chex.PRNGKey, chex.Array], chex.Array]:
     """Create a function that transforms images by randaugment.
 
     Args:
-        n_layers (int): Number of operations to apply.
+        n_layers (int): Number of operations to transform images.
         n_bins (int): Number of bins.
         augment_space (dict): Augmentation space.
-        order (int)
-        mode (str)
-        fill (int)
+        order (int): The order of the spline interpolation.
+                     Only nearest neighbor (0) and linear interpolation (1) are supported.
+        mode (str): The mode parameter determines how the input array is extended beyond its boundaries.
+                    "reflect", "grid-mirror", "constant", "grid-contant", "nearest",
+                    "mirror", "grid-wrap", and "wrap" are supported.
+        cval (int): Value to fill past edges of input if mode is "constant". Default is 128.
+
+    Returns:
+        A function that transforms images by randaugment.
+
+    Example:
+        >>> rng = jax.random.PRNGKey(0)
+        >>> apply_ra = create_randaugment(...)
+        >>> img = apply_ra(rng, img)
     """
 
     if augment_space is None:
@@ -54,29 +66,29 @@ def create_randaugment(
     @jax.jit
     def shear_x(img: chex.Array, idx: int, magnitudes: chex.Array):
         v = magnitudes[idx]
-        return F.shear(img, (0, v), order=order, mode=mode, fill=fill)
+        return F.shear(img, (0, v), order=order, mode=mode, cval=cval)
 
     @jax.jit
     def shear_y(img: chex.Array, idx: int, magnitudes: chex.Array):
         v = magnitudes[idx]
-        return F.shear(img, (v, 0), order=order, mode=mode, fill=fill)
+        return F.shear(img, (v, 0), order=order, mode=mode, cval=cval)
 
     @jax.jit
     def translate_x(img: chex.Array, idx: int, magnitudes: chex.Array):
         width = img.shape[1]
         v = width * magnitudes[idx]
-        return F.translate(img, (0, v), order=order, mode=mode, fill=fill)
+        return F.translate(img, (0, v), order=order, mode=mode, cval=cval)
 
     @jax.jit
     def translate_y(img: chex.Array, idx: int, magnitudes: chex.Array):
         height = img.shape[0]
         v = height * magnitudes[idx]
-        return F.translate(img, (v, 0), order=order, mode=mode, fill=fill)
+        return F.translate(img, (v, 0), order=order, mode=mode, cval=cval)
 
     @jax.jit
     def rotate(img: chex.Array, idx: int, magnitudes: chex.Array):
         v = magnitudes[idx]
-        return F.rotate(img, v, order=order, mode=mode, fill=fill)
+        return F.rotate(img, v, order=order, mode=mode, cval=cval)
 
     @jax.jit
     def brightness(img: chex.Array, idx: int, magnitudes: chex.Array):

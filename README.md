@@ -15,9 +15,8 @@ pip install -e .
 
 
 ## Note
-- Input image is expected to be an uint8 RGB array that has a shape of (height, width, channel).
+- Input image is expected to be an uint8 RGB array that has a shape of (..., height, width, channel).
 - Most of functions are not JIT-ed, so you should compile the augmentation part in your code.
-- Use vmap or pmap to transform multiple images at the same time.
 
 ## Example
 
@@ -51,5 +50,13 @@ image = vblend.blend_image(image, jnp.full_like(image, fill_value=image.mean()),
 image = jnp.float32(image) / 255.0
 ```
 
-## Future Work
-- Support NHWC format.
+### Video data.
+```python
+video = ...  # [n_frames, height, width, channel]
+
+# Apply same augmentation to all frames.
+video = VF.sharpness(video, factor=1.0)
+
+# Apply same augmentation with different parameters to all feames.
+video = jax.vmap(VF.sharpness)(video, jnp.linspace(0.5, 1.5, num_frames))
+```
