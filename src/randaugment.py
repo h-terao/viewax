@@ -118,7 +118,7 @@ def create_randaugment(
 
     @jax.jit
     def invert(img: chex.Array, idx: int, magnitudes: chex.Array):
-        return F.equalize(img)
+        return F.invert(img)
 
     @jax.jit
     def identity(img: chex.Array, idx: int, magnitudes: chex.Array):
@@ -162,16 +162,12 @@ def create_randaugment(
         )
         return carry, jnp.zeros(())
 
-    # @jax.jit
+    @jax.jit
     def fn(rng: chex.PRNGKey, img: chex.Array) -> chex.Array:
         rng_op, rng_mag = jax.random.split(rng, 2)
         op_idxs = jax.random.randint(rng_op, (n_layers,), 0, len(branches))
         mag_idxs = jax.random.randint(rng_mag, (n_layers,), 0, 2 * n_bins)
         img, _ = jax.lax.scan(body, img, xs=[op_idxs, mag_idxs])
-
-        print(op_idxs)
-        print(mag_idxs)
-        print()
         return img
 
     return fn
