@@ -1,6 +1,9 @@
 """
+Generate masks for CowOut and CowMix.
+
 Reference:
     French et al., "Milking CowMask for Semi-Supervised Image Classification." NeurIPS 2020.
+    
 Modify from:
     https://github.com/google-research/google-research/blob/master/milking_cowmask/masking/cow_mask.py
 """
