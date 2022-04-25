@@ -23,7 +23,7 @@ def random_crop(rng: chex.PRNGKey, img: chex.Array, size: tuple[int, int]) -> ch
     Args:
         rng (PRNGKey): A PRNG key.
         img (array): Image to crop.
-        size (tuple of int): Output size.
+        size (tuple of int): Output size (height, width).
 
     Returns:
         The cropped image.

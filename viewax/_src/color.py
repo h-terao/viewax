@@ -1,3 +1,4 @@
+"""Modify from: https://github.com/4rtemi5/imax/blob/master/imax/color_transforms.py"""
 from __future__ import annotations
 import jax
 import jax.numpy as jnp
