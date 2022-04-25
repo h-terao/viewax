@@ -37,3 +37,8 @@ save(jax.jit(viewax.random_crop, static_argnames="size")(rng, img, (64, 64)), "r
 save(jax.jit(viewax.center_crop, static_argnames="size")(img, (64, 64)), "center_crop.jpg")
 
 save(viewax.cutout(rng, img, mask_size=(32, 32), cval=128), "cutout.jpg")
+
+ra = jax.jit(viewax.create_randaugment(n_layers=3, n_bins=10))
+for i in range(10):
+    new_rng, rng = jax.random.split(rng)
+    save(jax.jit(ra)(new_rng, img), f"ra_{i}.jpg")
