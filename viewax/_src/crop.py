@@ -29,7 +29,7 @@ def random_crop(rng: chex.PRNGKey, img: chex.Array, size: tuple[int, int]) -> ch
         The cropped image.
     """
     img, original_shape = flatten(img)
-    batch_size, height, width, channel = original_shape
+    batch_size, height, width, channel = img.shape
 
     x_ratio, y_ratio = jax.random.uniform(rng, (2,))
 
@@ -53,7 +53,7 @@ def center_crop(img: chex.Array, size: tuple[int, int]) -> chex.Array:
         The cropped image.
     """
     img, original_shape = flatten(img)
-    batch_size, height, width, channel = original_shape
+    batch_size, height, width, channel = img.shape
 
     y_offset = jnp.int32((height - size[0] + 1) / 2)
     x_offset = jnp.int32((width - size[1] + 1) / 2)
@@ -76,7 +76,7 @@ def three_crop(img: chex.Array, size: tuple[int, int], interpolation="nearest") 
         Tuple of the cropped images.
     """
     img, original_shape = flatten(img)
-    batch_size, height, width, channel = original_shape
+    batch_size, height, width, channel = img.shape
 
     assert size[0] == size[1], "three_crop only supports size[0]==size[1]."
 
@@ -133,7 +133,7 @@ def five_crop(img: chex.Array, size: tuple[int, int]) -> tuple[chex.Array, ...]:
         Tuple of the cropped images.
     """
     img, original_shape = flatten(img)
-    batch_size, height, width, channel = original_shape
+    batch_size, height, width, channel = img.shape
 
     # upper left.
     y_offset = 0

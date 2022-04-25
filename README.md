@@ -16,47 +16,9 @@ pip install -e .
 
 ## Note
 - Input image is expected to be an uint8 RGB array that has a shape of (..., height, width, channel).
+    - Applying augmentation to images with different parameters is not supported. To achieve such augmentation, use vmap or pmap.
 - Most of functions are not JIT-ed, so you should compile the augmentation part in your code.
 
 ## Example
 
-```python
-import jax
-import jax.numpy as jnp
-from PIL import Image
-
-import viewax
-import viewax.functional as VF
-import viewax.blend as vblend
-
-rng = jax.random.PRNGKey(0)
-image = jnp.array(Image.open(...))
-
-# Cropping.
-image = viewax.random_crop(rng, image, (32, 32))
-
-# Color augmentation.
-image = VF.autocontrast(image)
-
-# Geometrical augmentation.
-image = VF.rotate(image, 30)
-
-# CutOut.
-h, w, _ = image.shape
-mask = vblend.create_cut_mask(rng, (h, w), (h//2, w//2))
-image = vblend.blend_image(image, jnp.full_like(image, fill_value=image.mean()), mask)
-
-# Normalize and feed it to DNNs.
-image = jnp.float32(image) / 255.0
-```
-
-### Video data.
-```python
-video = ...  # [n_frames, height, width, channel]
-
-# Apply same augmentation to all frames.
-video = VF.sharpness(video, factor=1.0)
-
-# Apply same augmentation with different parameters to all feames.
-video = jax.vmap(VF.sharpness)(video, jnp.linspace(0.5, 1.5, num_frames))
-```
+See example/test_all.py

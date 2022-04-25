@@ -21,6 +21,8 @@ __all__ = [
 
 def blend(img1: chex.Array, img2: chex.Array, factor: float) -> chex.Array:
     # factor * img1 + (1-factor) * img2
+    img1 = jnp.float32(img1)
+    img2 = jnp.float32(img2)
     return factor * (img1 - img2) + img2
 
 
@@ -29,7 +31,8 @@ def rgb2gray(img: chex.Array) -> chex.Array:
     img = jnp.float32(img)
     r, g, b = img[..., 0], img[..., 1], img[..., 2]
     v = 0.2989 * r + 0.5870 * g + 0.1140 * b
-    return jnp.stack([v, v, v], axis=-1).astype(jnp.uint8)
+    img = jnp.stack([v, v, v], axis=-1)
+    return img
 
 
 def solarize(img: chex.Array, threshold: int = 128, addition: int = 0) -> chex.Array:
@@ -44,28 +47,28 @@ def solarize(img: chex.Array, threshold: int = 128, addition: int = 0) -> chex.A
     """
     img = jnp.int32(img)
     img = jnp.clip(img + addition, 0, 255).astype(jnp.uint8)
-    return jnp.where(img < threshold, img, 255 - img)
+    return jnp.where(img < threshold, img, 255 - img).clip(0, 255).astype(jnp.uint8)
 
 
 def color(img: chex.Array, factor: float) -> chex.Array:
-    return blend(img, rgb2gray(img), factor)
+    return blend(img, rgb2gray(img), factor).clip(0, 255).astype(jnp.uint8)
 
 
 def contrast(img: chex.Array, factor: float) -> chex.Array:
     degenerate = rgb2gray(img * 255)[..., 0]
     degenerate = jnp.mean(degenerate, axis=(-1, -2))
     degenerate = jnp.floor(degenerate + 0.5)[..., None, None, None]
-    return blend(img, degenerate, factor)
+    return blend(img, degenerate, factor).clip(0, 255).astype(jnp.uint8)
 
 
 def brightness(img, factor):
-    return blend(img, jnp.zeros_like(img), factor)
+    return blend(img, jnp.zeros_like(img), factor).clip(0, 255).astype(jnp.uint8)
 
 
 def posterize(img: chex.Array, bits: int):
     shift = 8 - bits
     degenerate = jnp.left_shift(jnp.right_shift(img, shift), shift)
-    return jnp.uint8(degenerate)
+    return degenerate.clip(0, 255).astype(jnp.uint8)
 
 
 def autocontrast(img: chex.Array):
@@ -89,14 +92,14 @@ def autocontrast(img: chex.Array):
     img, original_shape = flatten(img)
 
     img = img.transpose(0, 3, 1, 2).reshape(-1, height, width)
-    img = jax.lax.scan(scale_channel, jnp.zeros(()), img)
+    _, img = jax.lax.scan(scale_channel, jnp.zeros(()), img)
     img = img.reshape(-1, channel, height, width).transpose(0, 2, 3, 1)
     img = unflatten(img, original_shape)
-    return img
+    return img.clip(0, 255).astype(jnp.uint8)
 
 
 def sharpness(img: chex.Array, factor: float):
-    img, original_shape = img.flatten(img)
+    img, original_shape = flatten(img)
 
     degenerate = img.astype("float32")
     # SMOOTH PIL Kernel.
@@ -121,7 +124,7 @@ def sharpness(img: chex.Array, factor: float):
 
     degenerate = blend(img, degenerate, factor)
     degenerate = unflatten(degenerate, original_shape)
-    return jnp.clip(degenerate, 0, 255).astype(jnp.uint8)
+    return degenerate.clip(0, 255).astype(jnp.uint8)
 
 
 def equalize(img: chex.Array) -> chex.Array:
@@ -178,8 +181,8 @@ def equalize(img: chex.Array) -> chex.Array:
     )
 
     img = img.reshape(-1, channel, height, width).transpose(0, 2, 3, 1)
-    return unflatten(img, original_shape)
+    return unflatten(img, original_shape).clip(0, 255).astype(jnp.uint8)
 
 
 def invert(img: chex.Array) -> chex.Array:
-    return 255 - img
+    return (255 - img).clip(0, 255).astype(jnp.uint8)
